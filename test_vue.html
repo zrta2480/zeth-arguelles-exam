@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        
+        <script src="https://cdn.jsdelivr.net/npm/vue@2.6.12/dist/vue.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    </head>
+    <body>
+
+        <!-- Test Code-->
+        <div id="myapp">
+
+            <!--Display All videos-->
+            <input type="button" value="Select All" @click="allVideos()">
+            <br><br>
+
+            <input type="text" placeholder="Enter Index">
+            <input type="button" value="Select video by Id" @click='videoByIndex()'>
+
+            <table border="1" width="80%" style="border-collapse: collapse;">
+                <tr>
+                    <th>#</th>
+                    <th>Thumbnail</th>
+                    <th>Link</th>
+                    <th>Title</th>
+                    <th>Description</th>
+                </tr>
+                
+                <tr v-for="(video, index) in videos">
+                    <td>{{ parseInt(index) + 1 }}</td>
+                    <td><img :src="video.thumbnail_url" width="100"></td>
+                    <td><a :href="video.video_link">{{video.video_link}}</a></td>
+                    <td>{{ video.title }}</td>
+                    <td>{{ video.description }}</td>
+                </tr>
+            </table>
+        </div>
+        
+        <script type="text/javascript" >
+            var temp = 1;
+            var app = new Vue({
+                el: '#myapp',
+                data: {
+                    videos: "",
+
+                },
+                methods: {
+                    allVideos: function() {
+                        axios.get('youtube_channel_json.php').then(function (response) {
+                            //app.videos = response.data.slice(0,20);
+                            app.videos = Object.fromEntries(Object.entries(response.data.videos_info).slice(0, 5));
+                           
+                            console.log(JSON.stringify(app.videos, null, null));
+                            console.log(temp);
+                        }).catch(function (error) {
+                            console.log(error);
+                        });
+                    }
+                },
+                beforeMount() {
+                    this.allVideos()
+                }
+            });
+        </script>
+    </body>
+</html>
