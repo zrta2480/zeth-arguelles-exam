@@ -9,15 +9,37 @@
             <br />
             <input type="submit" name="submit_channel_id" value="Save" />
         </form>
+
+       
     </body>
 </html>
 
 <?php
 //Initialize functions to be used:
+
+function redirectToShowPage() {
+    $url = "show_youtube_channel.html";
+    echo '<script type="text/javascript">';
+        echo 'window.location.href="'.$url.'";';
+        echo '</script>';
+        echo '<noscript>';
+        echo '<meta http-equiv="refresh" content="0;url='.$url.'" />';
+        echo '</noscript>'; exit;
+}
+
+function backButton() {
+    echo "<h4> Something Went Wrong! </h4>";
+    echo "<form action='show_youtube_channel.html' method='post'>";
+    echo "<input type='submit' name='back_button' value='Go Back' />";
+    echo "</form>";
+    die();
+}
+
 function trimVideoInfoIntoArray($videos_info) {
     if($videos_info->pageInfo->totalResults == 0 || empty($videos_info)) {
         echo "No videos available";
         echo "<br / >";
+        backButton();
         return array();
     }
 
@@ -37,14 +59,15 @@ function trimVideoInfoIntoArray($videos_info) {
         //$video_data[$key] = array_merge($video_data[$key], $temp_arr);
         array_push($video_data, $temp_arr);
     }
-    //echo var_dump($video_data);
+    
     return $video_data;
 }
 
 function checkIfChannelIsInDB($db, $channel_id) {
     if(empty($channel_id)) {
-        echo "Please enter a valid channel ID";
+        echo "No valid channel ID entered. Please enter a valid channel ID";
         echo "<br / >";
+        backButton();
         die();
     }
 
@@ -68,7 +91,7 @@ function insertNewChannelIntoDB($db, $channel_info) {
     } else {
         echo "Insertion Failed: " . $db->getLastError();
         echo "<br />";
-
+        backButton();
     }
 }
 
@@ -81,7 +104,7 @@ function insertVideosInfo($db, $total_video_data) {
         } else {
             echo "Insertion Failed: " . $db->getLastError();
             echo "<br />";
-    
+            backButton();
         }
     }
 }
@@ -99,26 +122,35 @@ function updateChannelInfo($db, $channel_info, $channel_id) {
     } else {
         echo "Error in Updating: " . $db->getLastError();
         echo "<br />";
+        backButton();
     }
 }
 
 function updateVideoInfo($db, $total_data, $channel_id) {
     $db->where("channel_id", $channel_id);
     $ids = $db->getValue("youtube_channel_videos", "id", null);
-    echo var_dump($ids);
-    echo var_dump($total_data);
+    
     for($x = 0; $x < sizeof($ids); $x++) {
         $db->where('id', $ids[$x]);
         $check = $db->update('youtube_channel_videos', $total_data[$x]);
         if(!$check) {
             echo "Error in Updating: " . $db->getLastError();
             echo "<br />";
+            backButton();
         }
     }
-    if(sizeof($total_data) > sizeof($ids)) {
-        for($i = sizeof($ids); sizeof($ids) < sizeof($total_data); $i++) {
-            $db->where('id', $ids[$i]);
-            $check = $db->update('youtube_channel_videos', $total_data[$i]);
+
+    // Not yet tested
+    if(sizeof($ids) < 100) {
+        if(sizeof($total_data) > sizeof($ids)) {
+            for($i = sizeof($ids); sizeof($ids) < sizeof($total_data); $i++) {
+                $check = $db->insert("youtube_channel_videos", $total_data[$i]);
+                if(!$check) {
+                    echo "Insertion Failed: " . $db->getLastError();
+                    echo "<br />";
+                    backButton();
+                } 
+            }
         }
     }
     echo "Updated Video INfo!";
@@ -131,40 +163,41 @@ require_once('MysqliDb.php');
 $db = new MysqliDb('localhost', 'root', '', 'youtube_db');
 //check connection
 if(!$db->ping()) {
+    backButton();
     die("Connection Failed" . $db->getLastError());
 } else {
     echo "Database Connected!";
     echo "<br />";
 }
 
+//Start Session
+session_start();
+//Remove previous channel ID
+session_unset();
+
 
 if(isset($_POST['submit_channel_id'])) {
-    $api_key = "AIzaSyBSoxTBm6Kv-1rLiZyCpVre1UCjb-3ak5E";
+    $api_key = "AIzaSyBSoxTBm6Kv-1rLiZyCpVre1UCjb-3ak5E"; // SET API KEY HERE!!!
     $base_url = "https://www.googleapis.com/youtube/v3";
     $max_num_result = 50;
-    // $channel_id = "UCxnUFZ_e7aJFw3Tm8mA7pvQ";
     $channel_id = $_POST['channel_id'];
+    //Set session to store channel ID:
+    $_SESSION['channel_id'] = $channel_id;
 
-    $api_url = $base_url . "/channels?part=snippet&id=" . $channel_id . "&key=" . $api_key;
-    //echo $api_url;
-    $channel_info = json_decode(file_get_contents($api_url));
+    $api_url = $base_url . "/channels?part=snippet&id=" . $channel_id . "&key=" . $api_key; // Form url to call API
+    $channel_info = json_decode(file_get_contents($api_url)); //Extract channel information from API
 
     $v_api_url = $base_url . "/search?order=date&part=snippet&channelId=" . $channel_id . 
-    "&maxResults=" . $max_num_result . "&key=" . $api_key;
-    // echo $v_api_url;
-    // echo "<br />";
-    $videos_info = json_decode(file_get_contents($v_api_url));
-    // $page2_token = $videos_info->nextPageToken;
-    // $page2_videos = $base_url . "/search?pageToken=". $page2_token ."&order=date&part=snippet&channelId=" . $channel_id . 
-    // "&maxResults=" . $max_num_result . "&key=" . $api_key;;
-    // $page2_videos_info = json_decode(file_get_contents($page2_videos));
+    "&maxResults=" . $max_num_result . "&key=" . $api_key; // Form url to call API
+    $videos_info = json_decode(file_get_contents($v_api_url)); //Extract videos information from API
 
-    $total_video_data = array();
+    $total_video_data = array(); // Initialize array to store videos information
 
     //Check if API responds
     if(empty($channel_info)) {
         echo "API not responding";
         echo "<br / >";
+        backButton();
         die();
     }
 
@@ -172,6 +205,7 @@ if(isset($_POST['submit_channel_id'])) {
     if($channel_info->pageInfo->totalResults == 0) {
         echo "Channel Does not exist";
         echo "<br / >";
+        backButton();
         die();
     }
 
@@ -208,28 +242,10 @@ if(isset($_POST['submit_channel_id'])) {
         insertNewChannelIntoDB($db, $channel_info);
         insertVideosInfo($db, $total_video_data);
     }
-    // echo "<pre>";
-    // print_r($channel_info);  
-    // echo "</pre>";
-
-    // echo "Channel Info: <br />";
-    // echo "Channel ID: " . $channel_info->items[0]->id;
-    // echo "<br />";
-    // echo "Channel Title: " . $channel_info->items[0]->snippet->title;
-    // echo "<br />";
-    // echo "Channel Description: " . $channel_info->items[0]->snippet->description;
-    // echo "<br />";
-
-
-    
-
-    foreach($videos_info->items as $video) {
-        echo "Video Title: " . $video->snippet->title;
-        echo "<br />";
-    }
 
     unset($_POST['submit_channel_id']);
     unset($_POST['channel_id']);
+    redirectToShowPage();
 }
 
 ?>

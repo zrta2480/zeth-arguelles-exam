@@ -2,11 +2,167 @@
 <html>
     <head>
         
-        <script type="text/javascript" src="vue.min.js"></script>
-        <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/vue@2.6.12/dist/vue.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+        <link rel="stylesheet" href="stylesheet.css">
     </head>
     <body>
-
+        <form action="sync_youtube_channel.php" method="post" class="center">
+            Youtube Channel ID: <input type="text" placeholder="Enter ID Here..." name="channel_id" />
+            <input type="submit" name="submit_channel_id" value="Save and Search" />
+            <br />
+        </form>
         
+        <div id="myapp">
+
+            <table class="etable2" width="80%" style="border-collapse: collapse;">
+                <tr>
+                    <td rowspan="2"><img :src="channel.profile_picture_url" width="200" alt="Profile Image"></td>
+                    <td>Channel Name: </td>
+                    <td>{{ channel.name }}</td>
+                </tr>
+                <tr>
+                    <td>Description</td>
+                    <td>{{ channel.description }}</td>
+                </tr>
+            </table>
+
+            <div class="center">
+                <div class="pagination">
+                    <a href="#" @click="prevPageButton()">&laquo;</a>
+                    <a href="#" @click="page1Button()">1</a>
+                    <a href="#" @click="page2Button()">2</a>
+                    <a href="#" @click="page3Button()">3</a>
+                    <a href="#" @click="page4Button()">4</a>
+                    <a href="#" @click="page5Button()">5</a>
+                    <a href="#" @click="nextPageButton()">&raquo;</a>
+                </div>
+            </div>
+
+            <table class="etable2" width="80%" style="border-collapse: collapse;">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Thumbnail</th>
+                        <th>Link</th>
+                        <th>Title</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                
+                <tr v-for="(video, index) in videos">
+                    <td>{{ parseInt(index) + 1 }}</td>
+                    <td><a :href="video.video_link"><img :src="video.thumbnail_url" width="200"></a></td>
+                    <td><a :href="video.video_link">{{video.video_link}}</a></td>
+                    <td>{{ video.title }}</td>
+                    <td>{{ video.description }}</td>
+                </tr>
+            </table>
+
+            <div class="center">
+                <div class="pagination">
+                    <a href="#" @click="prevPageButton()">&laquo;</a>
+                    <a href="#" @click="page1Button()">1</a>
+                    <a href="#" @click="page2Button()">2</a>
+                    <a href="#" @click="page3Button()">3</a>
+                    <a href="#" @click="page4Button()">4</a>
+                    <a href="#" @click="page5Button()">5</a>
+                    <a href="#" @click="nextPageButton()">&raquo;</a>
+                </div>
+            </div>
+        </div>
+        
+        <script type="text/javascript" >
+            var pageIndex = 0; // Initialize page index variable
+            var app = new Vue({
+                el: '#myapp',
+                data: {
+                    all_videos: "",
+                    videos: "",
+                    channel: ""
+                },
+                methods: {
+                    getVideoInfo: function() {
+                        var start = 0;
+                        var end = 100;
+                        switch(pageIndex) {
+                            case 0:
+                                start = 0;
+                                end = 20;
+                                break;
+                            case 1:
+                                start = 20;
+                                end = 40;
+                                break;
+                            case 2:
+                                start = 40;
+                                end = 60;
+                                break;
+                            case 3:
+                                start = 60;
+                                end = 80;
+                                break;
+                            case 4: 
+                                start = 80;
+                                end = 100;
+                                break;
+                            default: 
+                                start = 0;
+                                end = 100;
+                        }
+                        app.videos = Object.fromEntries(Object.entries(app.all_videos).slice(start, end));
+                    },
+                    getInitialInfo: function() {
+                        axios.get('youtube_channel_json.php').then(function (response) {
+                            
+                            //Retrieve channel Information:
+                            app.channel = response.data.channel_info[0];
+                            //Retrieve all video information
+                            app.all_videos = response.data.videos_info;
+                            //Assign video information to table
+                            app.getVideoInfo();
+                        }).catch(function (error) {
+                            console.log(error);
+                        });
+                    },
+                    prevPageButton: function() {
+                        if(pageIndex > 0) {
+                            pageIndex = pageIndex - 1;
+                        }
+                        app.getVideoInfo();
+                    },
+                    page1Button: function() {
+                        pageIndex = 0;
+                        app.getVideoInfo();
+                    },
+                    page2Button: function() {
+                        pageIndex = 1;
+                        app.getVideoInfo();
+                    },
+                    page3Button: function() {
+                        pageIndex = 2;
+                        app.getVideoInfo();
+                    },
+                    page4Button: function() {
+                        pageIndex = 3;
+                        app.getVideoInfo();
+                    },
+                    page5Button: function() {
+                        pageIndex = 4;
+                        app.getVideoInfo();
+                    },
+                    nextPageButton: function() {
+                        if(pageIndex < 4) {
+                            pageIndex = pageIndex + 1;
+                        }
+                        app.getVideoInfo();
+                    }
+                   
+                },
+                beforeMount() {
+                    this.getInitialInfo()
+                }
+            });
+        </script>
     </body>
 </html>
