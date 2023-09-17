@@ -143,7 +143,7 @@ function updateVideoInfo($db, $total_data, $channel_id) {
     // Not yet tested
     if(sizeof($ids) < 100) {
         if(sizeof($total_data) > sizeof($ids)) {
-            for($i = sizeof($ids); sizeof($ids) < sizeof($total_data); $i++) {
+            for($i = sizeof($ids); $i < sizeof($total_data); $i++) {
                 $check = $db->insert("youtube_channel_videos", $total_data[$i]);
                 if(!$check) {
                     echo "Insertion Failed: " . $db->getLastError();
