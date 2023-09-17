@@ -157,10 +157,8 @@ function updateVideoInfo($db, $total_data, $channel_id) {
     echo "<br />";
 }
 
-//import required class
-require_once('MysqliDb.php');
-//connect to database
-$db = new MysqliDb('localhost', 'root', '', 'youtube_db');
+//Include db_connect to access database
+include "db_connect.php";
 //check connection
 if(!$db->ping()) {
     backButton();

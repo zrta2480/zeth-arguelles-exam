@@ -1,21 +1,21 @@
 <?php
-//import required class
-require_once('MysqliDb.php');
-//connect to database
-$db = new MysqliDb('localhost', 'root', '', 'youtube_db');
+//Include db_connect to access database
+include "db_connect.php";
+//Initialize Array to contain all information
+$all_data = array(
+    'channel_info' => [],
+    'videos_info' => [],
+    'error'=>''
+);
 //check connection
 if(!$db->ping()) {
-    die("Connection Failed" . $db->getLastError());
+    $all_data['error'] = "Connection Failed" . $db->getLastError();
 } 
 
 //Initialize session to access channel_id variable
 session_start();
 
-//Initialize Array to contain all information
-$all_data = array(
-    'channel_info' => [],
-    'videos_info' => []
-);
+
 
 if(isset($_SESSION['channel_id'])) {
     // $channel_id = "UCxnUFZ_e7aJFw3Tm8mA7pvQ";
@@ -34,7 +34,10 @@ if(isset($_SESSION['channel_id'])) {
     // Store retrieved information to main array
     $all_data['channel_info'] = $channel_info;
     $all_data['videos_info'] = $videos_info;
-
+    
+    if(empty($all_data['$channel_info'])) {
+        $all_data['error'] = "Channel Does not exist";
+    }
 }
 
 // Clear session and its data
