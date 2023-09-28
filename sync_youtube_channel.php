@@ -175,7 +175,7 @@ session_unset();
 
 
 if(isset($_POST['submit_channel_id'])) {
-    $api_key = "AIzaSyBSoxTBm6Kv-1rLiZyCpVre1UCjb-3ak5E"; // SET API KEY HERE!!!
+    $api_key = ""; // SET API KEY HERE!!!
     $base_url = "https://www.googleapis.com/youtube/v3";
     $max_num_result = 50;
     $channel_id = $_POST['channel_id'];
