@@ -28,7 +28,7 @@ properly deploy pages using Xampp I had to store them in C:\xampp\htdocs.
 3. Access the main html page. The link will look something like this: http://localhost/../../show_youtube_channel.html
 
 
-# Explanation for each page file:
+## Explanation for each page file:
 1. sync_youtube_channel.php
 This file uses the Youtube API key to retrieve information from a specified Youtube channel based on the inputed channel ID
 the used has inputed in show_youtube_channel.html. The information retrieved is the name, description and link to profile picture
