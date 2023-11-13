@@ -46,4 +46,4 @@ youtube channel then click the share button.
 Recieves the information through the JSON provided by the youtube_channel_json.php file, then uses Vue.js to display the 
 relevant information
 
-![how to get channel ID](https://github.com/zrta2480/zeth-arguelles-exam/blob/master/read_me_images\how-to-get-channel-id.jpg)
+![how to get channel ID](https://github.com/zrta2480/zeth-arguelles-exam/blob/master/read_me_images/how-to-get-channel-id.jpg)
