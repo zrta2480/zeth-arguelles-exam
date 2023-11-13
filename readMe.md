@@ -1,12 +1,12 @@
 Exam by: [Zeth Raphael T. Arguelles], [Sept. 16, 2023 ], [Sept. 12, 2023 4:00 PM], [Sept. 16, 2023 12:25 AM]
 
-##Description:
+## Description:
 This is my output for a technical exam. The requirements for this activity was to create a program that would 
 retieve information from Youtube channels of your choosing. The program would store this information in a database
 then display them using an html page. The technologies used were [ThingEngineer PHP-MySQLi-Database-Class](https://github.com/ThingEngineer/PHP-MySQLi-Database-Class), a Database management system (in my case I used the one built-in in Xampp), 
 and Vue.js.
 
-##Prerequisite:
+## Prerequisite:
 
 1. Have a database management system ready in computer you are using
 
@@ -28,7 +28,7 @@ properly deploy pages using Xampp I had to store them in C:\xampp\htdocs.
 3. Access the main html page. The link will look something like this: http://localhost/../../show_youtube_channel.html
 
 
-#Explanation for each page file:
+# Explanation for each page file:
 1. sync_youtube_channel.php
 This file uses the Youtube API key to retrieve information from a specified Youtube channel based on the inputed channel ID
 the used has inputed in show_youtube_channel.html. The information retrieved is the name, description and link to profile picture
